@@ -1,0 +1,25 @@
+<package format="2">
+  <name>franka_panda_driver</name>
+  <version>1.0.0</version>
+  <description>An Orocos component wrapper of libfranka for Panda</description>
+  <maintainer email="enea.scioni@kuleuven.be">Enea Scioni</maintainer>
+
+  <license>Unknown</license>
+
+  <url type="github.com/haianos/franka_panda_driver"></url>
+  <!-- <url type="bugtracker"></url> -->
+
+  <author>Enea Scioni</author>
+
+  <build_depend>orogen</build_depend>
+  <depend>rtt</depend>
+  <depend>rtt_roscomm</depend>
+  <depend>rtt_motion_control_msgs</depend>
+  <depend>rtt_sensor_msgs</depend>
+  <depend>rtt_trajectory_msgs</depend>
+
+
+  <export>
+
+  </export>
+</package>
