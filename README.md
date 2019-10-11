@@ -10,6 +10,7 @@ WIP (work-in-progress)
 
 * libfranka
 * motion_control (CATKIN package)
+* Orocos and ros_rtt installed
 
 
 
@@ -17,11 +18,20 @@ WIP (work-in-progress)
 
 (Tested on Ubuntu 16.04 LTS, Orocos 2.8)
 
-```lua
+**NOTE** this step won't be necessary in the future (FIXME)
 
+```bash
+git submodule init
+git submodule update
+cd libfranka
+git submodule init
+git submodule update
+mkdir build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=<workspace>/devel/lib
+make install
 ```
 
-
+and finally, `catkin_make` from root workspace.
 
 ## Run
 

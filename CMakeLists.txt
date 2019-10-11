@@ -31,12 +31,15 @@ find_package(catkin REQUIRED
 # documentation.
 include( ${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake )
 
+# add_subdirectory(libfranka)
+# include_directories(/home/haianos/experimental/libfranka/install/include)
+# link_directories(/home/haianos/experimental/libfranka/install/lib)
+
 # TODO: FiX me
-include_directories(/home/haianos/experimental/libfranka/install/include)
-link_directories(/home/haianos/experimental/libfranka/install/lib)
+link_directories(/home/haianos/frankaws/devel/lib)
 
 # Rest of the configuration is in src/
-add_subdirectory( src )
+add_subdirectory(src)
 #
 # Building a typekit using typegen (recommended):
 #
@@ -49,6 +52,10 @@ add_subdirectory( src )
 # orocos_typegen_headers(include/franka_panda_driver/franka_panda_driver-types.hpp) # ...you may add multiple header files
 #
 # You may only have *ONE* orocos_typegen_headers statement in your toplevel CMakeFile.txt !
+
+# install(TARGETS libfranka
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+# )
 
 
 
