@@ -12,7 +12,19 @@
 #
 orocos_component(FrankaComponent franka_panda_driver-component.hpp franka_panda_driver-component.cpp) # ...you may add multiple source files
 
-target_link_libraries(FrankaComponent franka)
+# target_link_libraries(FrankaComponent /home/santiregui/etasl-install/ws/etasl-ex/devel/lib/lib/libfranka.so.0.7.1)
+
+# find_library(FRANKA_LIB franka HINTS /lib/)
+find_library(FRANKA_LIB franka)
+target_link_libraries(FrankaComponent ${FRANKA_LIB})
+
+
+
+
+include_directories(
+   # include
+   ${catkin_INCLUDE_DIRS}
+)
 
 #
 # You may add multiple orocos_component statements.
@@ -60,5 +72,3 @@ target_link_libraries(FrankaComponent franka)
 # orocos_library(franka_panda_driver-support support.cpp) # ...you may add multiple source files
 #
 # You may add multiple orocos_library statements.
-
-

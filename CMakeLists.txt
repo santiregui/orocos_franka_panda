@@ -24,7 +24,13 @@ find_package(catkin REQUIRED
   rtt_motion_control_msgs
   rtt_sensor_msgs
   rtt_trajectory_msgs
+  sensor_msgs
+  motion_control_msgs
 )
+
+# find_package(catkin QUIET OPTIONAL_COMPONENTS rtt_ros roscpp)
+
+
 
 
 # Defines the orocos_* cmake macros. See that file for additional
@@ -36,7 +42,12 @@ include( ${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake )
 # link_directories(/home/haianos/experimental/libfranka/install/lib)
 
 # TODO: FiX me
-link_directories(/home/haianos/frankaws/devel/lib)
+# link_directories(/home/haianos/frankaws/devel/lib)
+# link_directories(/home/santiregui/etasl-install/ws/etasl-ex/devel/lib)
+
+include_directories(
+   libfranka/include
+)
 
 # Rest of the configuration is in src/
 add_subdirectory(src)
