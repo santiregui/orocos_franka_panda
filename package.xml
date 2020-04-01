@@ -12,6 +12,7 @@
   <author>Enea Scioni</author>
 
   <build_depend>orogen</build_depend>
+  <buildtool_depend>catkin</buildtool_depend>
   <depend>rtt</depend>
   <depend>rtt_roscomm</depend>
   <depend>rtt_motion_control_msgs</depend>
