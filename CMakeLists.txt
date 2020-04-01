@@ -9,11 +9,17 @@ cmake_minimum_required(VERSION 2.6.3)
 # any cmake macro you see fit.
 #
 project(franka_panda_driver)
+# add_definitions(-std=c++11)
+
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -Wall")#Generates additional warning messages when compiling
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# catkin_package(
+#     CATKIN_DEPENDS etasl_rtt
+# )
 # Use 'source orocos_toolchain/env.sh' if the command below fails:
 find_package(OROCOS-RTT QUIET)
 if (NOT OROCOS-RTT_FOUND)
