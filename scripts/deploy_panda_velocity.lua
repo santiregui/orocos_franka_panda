@@ -28,12 +28,21 @@ dir = rtt.provides("ros"):find("orocos_franka_panda") .. "/scripts/"
 --Load the component generating the trajectory
 depl:loadComponent("traj_gen", "OCL::LuaComponent")
 traj_gen = depl:getPeer("traj_gen")
-traj_gen:exec_file(dir .. "low_level_velocity_component.lua")
+traj_gen:exec_file(dir .. "velocity_generator.lua")
 traj_gen:configure()
 
 --Load the driver
-depl:loadComponent("kin", "kinova_gen3")
-kin = depl:getPeer("kin")
+-- depl:loadComponent("kin", "kinova_gen3")
+-- kin = depl:getPeer("kin")
+depl:loadComponent("panda", "FrankaComponent")
+panda:getProperty('ip_address'):set("172.16.0.2")
+-- depl:setActivity("panda", 0, 99, rtt.globals.ORO_SCHED_RT)
+-- panda:setPeriod(0.005)
+
+-- panda:configure()
+-- panda:start()
+
+
 
 --Connect the ports
 cp=rtt.Variable("ConnPolicy")

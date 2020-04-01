@@ -25,18 +25,20 @@ ros = gs:provides("ros")
 depl:import('rtt_rosnode')
 --
 depl:loadComponent("panda", "FrankaComponent")
--- panda=depl:getPeer("panda")
+panda=depl:getPeer("panda")
 
 
 --Configuration
 panda:getProperty('ip_address'):set("172.16.0.2")
--- depl:setActivity("panda", 0, 99, rtt.globals.ORO_SCHED_RT)
+depl:setActivity("panda", 0, 99, rtt.globals.ORO_SCHED_RT)
 -- panda:setPeriod(0.005)
 
--- panda:configure()
+panda:configure()
 -- panda:start()
 
-
+initial_angle = rtt.Variable("array")
+initial_angle = panda:get_joint_angles()
+print(initial_angle)
 -------------------------------------------
 ---- ROS Streams
 -- depl:stream("panda.joint_states", ros:topic("/joint_states"))
