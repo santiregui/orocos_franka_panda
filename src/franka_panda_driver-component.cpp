@@ -127,14 +127,14 @@ void FrankaComponent::low_level_velocity(){
           else{
             velocities = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
           }
-            for(unsigned int i=0;i<NR_JOINT;++i) {
-              // m_joint_states.position[i]   = state.q[i];
-              // m_joint_states.velocity[i] = state.dq[i];
-              temporary_actual_pos[i] = state.q[i];
-            }
-            for(unsigned int i=0;i<6;++i) {
-              temporary_actual_wrench[i] = state.K_F_ext_hat_K[i];
-            }
+          for(unsigned int i=0;i<NR_JOINT;++i) {
+            // m_joint_states.position[i]   = state.q[i];
+            // m_joint_states.velocity[i] = state.dq[i];
+            temporary_actual_pos[i] = state.q[i];
+          }
+          for(unsigned int i=0;i<6;++i) {
+            temporary_actual_wrench[i] = state.K_F_ext_hat_K[i];
+          }
 
           sensor_joint_angles.write(temporary_actual_pos);
           tool_external_wrench.write(temporary_actual_wrench);
@@ -160,7 +160,16 @@ void FrankaComponent::low_level_velocity(){
 
 void FrankaComponent::admittance(){
   try {
-    panda->control([&](const franka::RobotState&, franka::Duration) -> franka::Torques {
+    panda->control(
+      [&](const franka::RobotState& state, franka::Duration) -> franka::Torques {
+        for(unsigned int i=0;i<NR_JOINT;++i) {
+          temporary_actual_pos[i] = state.q[i];
+        }
+        for(unsigned int i=0;i<6;++i) {
+          temporary_actual_wrench[i] = state.K_F_ext_hat_K[i];
+        }
+        sensor_joint_angles.write(temporary_actual_pos);
+        tool_external_wrench.write(temporary_actual_wrench);
         return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
       });
   } catch (const franka::Exception& e) {
