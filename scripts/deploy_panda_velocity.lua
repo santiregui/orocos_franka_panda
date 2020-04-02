@@ -24,8 +24,8 @@ gs=rtt.provides()
 ros = gs:provides("ros")
 ros:import("rtt_rospack")
 
--- dir = rtt.provides("ros"):find("orocos_franka_panda") .. "/scripts/"
-dir = "/home/santiregui/etasl-install/ws/etasl-ex/src/orocos_franka_panda/scripts/"
+dir = rtt.provides("ros"):find("orocos_franka_panda") .. "/scripts/"
+-- dir = "/home/santiregui/etasl-install/ws/etasl-ex/src/orocos_franka_panda/scripts/"
 print(dir)
 
 --Load the component generating the trajectory
@@ -50,5 +50,5 @@ depl:setActivity("traj_gen", 0.01, 0, rtt.globals.ORO_SCHED_OTHER)
 traj_gen:start()
 
 panda:error_recovery()
-panda:low_level_velocity()
+-- panda:low_level_velocity()
 -- panda:admittance()
