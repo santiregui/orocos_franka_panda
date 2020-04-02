@@ -28,12 +28,14 @@ class FrankaComponent : public RTT::TaskContext{
     void stopHook();
     void cleanupHook();
     void start_sending_setpoints();
+    void admittance();
+    void low_level_velocity();
+    void stop_control_loop();
     std::vector<double> get_joint_angles();
 
   private:
     PandaPtr panda;
-    bool sending_setpoints;
-
+    bool control_loop_running;
 
     // Internal, mem alloc
     // motion_control_msgs::JointPositions  m_joint_pos_command;
@@ -72,6 +74,7 @@ class FrankaComponent : public RTT::TaskContext{
     std::vector<double>                       temporary_actual_pos;
     std::vector<double>                       temporary_actual_wrench;
     franka::RobotState                        temporary_robot_state;
+    // franka::JointVelocities                   franka_joint_velocities;
 
 
     // Properties

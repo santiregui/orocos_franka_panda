@@ -1,5 +1,7 @@
 require("rttlib")
 require("math")
+-- require("inspect") --Just for debuging, it allows to print pretty lua tables. Install by: running sudo luarocks install inspect
+
 
 --This component generates a sine wave for joint velocities
 
@@ -30,20 +32,18 @@ amplitud = 20*math.pi/180 --Radians
 function updateHook()
 
 -- angle = math.sin(2*math.pi*frequency*time )*amplitud
-angle = math.cos(2*math.pi*frequency*time )*amplitud*2*math.pi*frequency
-mytab = {0,0,0,0,0,0,angle} --For velocities
+angle = math.sin(2*math.pi*frequency*time )*amplitud
+-- mytab = {0,0,0,0,0,0,angle} --For velocities
+mytab = {0,0,0,0,0,0,0} --For velocities
 -- mytab = {0,0,0,0,0,0,2*math.pi/180} --For velocities
 
 joint_setpoints:fromtab(mytab)
 desired_velocities:write(joint_setpoints)
 time = time + tc:getPeriod()
 
-    --Uncomment for printing the measured angles in the terminal:
-    --local fs,val= measured_angles:read()
-    -- myTable = val:totab()
-    -- for k,v in pairs(myTable) do
-    --   print("actuator  #" .. k .. "    value:  " .. round(v*180/math.pi,1) )
-    -- end
+    -- Uncomment for printing the measured angles in the terminal:
+    local fs,val= measured_angles:read()
+    -- print(val)
 
 end
 

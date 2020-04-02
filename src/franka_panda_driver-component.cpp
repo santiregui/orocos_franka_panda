@@ -16,7 +16,7 @@ void setDefaultBehavior(FrankaComponent::PandaPtr& panda) {
 
 FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreOperational)
   , p_ip_address("172.16.0.2")
-  , sending_setpoints(false)
+  , control_loop_running(false)
   {
 
   /* Setting up Orocos component interface */
@@ -32,6 +32,9 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   //Operations
   this->addOperation("start_sending_setpoints",  &FrankaComponent::start_sending_setpoints, this, OwnThread).doc("Starts sending the setpoints of the joints to the robot");
   this->addOperation("get_joint_angles",  &FrankaComponent::get_joint_angles, this, OwnThread).doc("Get the current sensed joint angles [rad]. Useful to initialize your trajectory planner.");
+  this->addOperation("admittance",  &FrankaComponent::admittance, this, OwnThread).doc("Start admittance mode: command torques to zero (gravity compensated)");
+  this->addOperation("low_level_velocity",  &FrankaComponent::low_level_velocity, this, OwnThread).doc("Start sending velocity setpoints at 1kHz");
+  this->addOperation("stop_control_loop",  &FrankaComponent::stop_control_loop, this, OwnThread).doc("Stop the current control loop (at 1kHz)");
 
   //Memory allocation for the size of the vectors done beforehand (real time)
   temporary_desired_vel.resize(NR_JOINT,0.0);
@@ -60,29 +63,30 @@ bool FrankaComponent::configureHook(){
 bool FrankaComponent::startHook(){
 
   std::cout << "Franka_panda_driver started !" <<std::endl;
-  panda->control(
-  [&  ](const franka::RobotState& state, franka::Duration period) -> franka::JointVelocities {
-
-    for(unsigned int i=0;i<NR_JOINT;++i) {
-      // m_joint_states.position[i]   = state.q[i];
-      // m_joint_states.velocity[i] = state.dq[i];
-      temporary_actual_pos[i] = state.q[i];
-    }
-    for(unsigned int i=0;i<6;++i) {
-      temporary_actual_wrench[i] = state.K_F_ext_hat_K[i];
-    }
-
-    sensor_joint_angles.write(temporary_actual_pos);
-    tool_external_wrench.write(temporary_actual_wrench);
-
-    franka::JointVelocities velocities = {{0.0,0.0,0.0,0.0,0.0,0.0,0.0}};
-    return velocities;
-  });
-  return true;
+  // panda->control(
+  // [&  ](const franka::RobotState& state, franka::Duration period) -> franka::JointVelocities {
+  //
+  //   for(unsigned int i=0;i<NR_JOINT;++i) {
+  //     // m_joint_states.position[i]   = state.q[i];
+  //     // m_joint_states.velocity[i] = state.dq[i];
+  //     temporary_actual_pos[i] = state.q[i];
+  //   }
+  //   // for(unsigned int i=0;i<6;++i) {
+  //   //   temporary_actual_wrench[i] = state.K_F_ext_hat_K[i];
+  //   // }
+  //
+  //   sensor_joint_angles.write(temporary_actual_pos);
+  //   // tool_external_wrench.write(temporary_actual_wrench);
+  //
+  //   franka::JointVelocities velocities = {{0.0,0.0,0.0,0.0,0.0,0.0,0.0}};
+  //   return velocities;
+  // });
+  // return true;
 }
 
 void FrankaComponent::updateHook(){
 //   std::cout << "Franka_panda_driver executes updateHook !" <<std::endl;
+// TODO: Stop the activity whenever this is called (franka takes care of the 1kHz loop)
 }
 
 void FrankaComponent::stopHook() {
@@ -94,6 +98,65 @@ void FrankaComponent::cleanupHook() {
 }
 
 void FrankaComponent::start_sending_setpoints(){
+  //TODO: Delete this function
+}
+
+void FrankaComponent::stop_control_loop(){
+  control_loop_running = false;
+  //TODO: fill
+}
+
+
+void FrankaComponent::low_level_velocity(){
+  control_loop_running = true;
+  try {
+
+  franka::JointVelocities velocities = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    panda->control(
+        [&](const franka::RobotState& state, franka::Duration period) -> franka::JointVelocities {
+          // std::fill(temporary_actual_pos.begin(), temporary_actual_pos.end(), 0.0); //Assigns zero values to the vector, just in case to prevent the posibility of observing old values. Can be deleted to improve a bit the speed.
+          if ( control_joint_velocities.read(temporary_desired_vel) != NoData ){
+            velocities = {{temporary_desired_vel[0], temporary_desired_vel[1], temporary_desired_vel[2], temporary_desired_vel[3], temporary_desired_vel[4], temporary_desired_vel[5], temporary_desired_vel[6]}};
+            // std::cout << temporary_desired_vel[6] << std::endl;
+          }
+          else{
+            velocities = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+          }
+            for(unsigned int i=0;i<NR_JOINT;++i) {
+              // m_joint_states.position[i]   = state.q[i];
+              // m_joint_states.velocity[i] = state.dq[i];
+              temporary_actual_pos[i] = state.q[i];
+            }
+            for(unsigned int i=0;i<6;++i) {
+              temporary_actual_wrench[i] = state.K_F_ext_hat_K[i];
+            }
+
+          sensor_joint_angles.write(temporary_actual_pos);
+          tool_external_wrench.write(temporary_actual_wrench);
+
+
+          if (!control_loop_running) {
+            std::cout << "Finished motion" << std::endl;
+            return franka::MotionFinished(velocities);
+          }
+          return velocities;
+        });
+  } catch (const franka::Exception& e) {
+    std::cout << e.what() << std::endl;
+  }
+}
+
+
+void FrankaComponent::admittance(){
+
+  try {
+    panda->control([&](const franka::RobotState&, franka::Duration) -> franka::Torques {
+        return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+      });
+  } catch (const franka::Exception& e) {
+    std::cout << e.what() << std::endl;
+  }
+
   //TODO: fill
 }
 

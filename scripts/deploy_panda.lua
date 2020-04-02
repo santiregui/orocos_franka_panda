@@ -14,8 +14,8 @@ tc=rtt.getTC()
 depl=tc:getPeer("Deployer")
 
 
-depl:import("rtt_rospack")
 depl:import("rtt_ros")
+depl:import("rtt_rospack")
 depl:import("rtt_sensor_msgs")
 depl:import("franka_panda_driver")
 depl:import("rtt_motion_control_msgs")
