@@ -75,7 +75,7 @@ class FrankaComponent : public RTT::TaskContext{
     std::vector<double>                       temporary_actual_pos;
     std::vector<double>                       temporary_actual_wrench;
     franka::RobotState                        temporary_robot_state;
-    // franka::JointVelocities                   franka_joint_velocities;
+    std::string                               events;
 
 
     // Properties
@@ -83,6 +83,7 @@ class FrankaComponent : public RTT::TaskContext{
 
     // Port Interface
     RTT::InputPort<std::vector<double>>      control_joint_velocities;
+    RTT::InputPort<std::string>              events_port;
     RTT::OutputPort<std::vector<double>>     sensor_joint_angles;
     RTT::OutputPort<std::vector<double>>     tool_external_wrench;
 

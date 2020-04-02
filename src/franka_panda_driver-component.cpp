@@ -26,6 +26,7 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   /// Output
   this->addPort("sensor_joint_angles",             sensor_joint_angles).doc("Current sensed joint angles [rad]");
   this->addPort("tool_external_wrench",          tool_external_wrench).doc("External wrench calculated from the measured data: three forces [N] and three moments [Nm]");
+  this->addPort("events_port",          events_port).doc("eTaSL Event Port (temporary solution)");
   // Properties
   this->addProperty("ip_address", p_ip_address).doc("ip_address of the robot's controller. Default: 172.16.0.2");
 
@@ -139,10 +140,16 @@ void FrankaComponent::low_level_velocity(){
           tool_external_wrench.write(temporary_actual_wrench);
 
 
-          if (!control_loop_running) {
-            std::cout << "Finished motion" << std::endl;
+          if (events_port.read(events) == NewData) {
             return franka::MotionFinished(velocities);
+            std::cout << "eTasL Event received:" << std::endl;
+            std::cout << events << std::endl;
+            std::cout << "Finished motion" << std::endl;
           }
+          // if (!control_loop_running) {
+          //   std::cout << "Finished motion" << std::endl;
+          //   return franka::MotionFinished(velocities);
+          // }
           return velocities;
         });
   } catch (const franka::Exception& e) {
