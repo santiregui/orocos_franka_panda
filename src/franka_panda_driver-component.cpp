@@ -35,6 +35,7 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   this->addOperation("admittance",  &FrankaComponent::admittance, this, OwnThread).doc("Start admittance mode: command torques to zero (gravity compensated)");
   this->addOperation("low_level_velocity",  &FrankaComponent::low_level_velocity, this, OwnThread).doc("Start sending velocity setpoints at 1kHz");
   this->addOperation("stop_control_loop",  &FrankaComponent::stop_control_loop, this, OwnThread).doc("Stop the current control loop (at 1kHz)");
+  this->addOperation("error_recovery",  &FrankaComponent::error_recovery, this, OwnThread).doc("Automatic error recovery (e.g. after the robot hits joint limits or collides)");
 
   //Memory allocation for the size of the vectors done beforehand (real time)
   temporary_desired_vel.resize(NR_JOINT,0.0);
@@ -105,6 +106,9 @@ void FrankaComponent::stop_control_loop(){
   control_loop_running = false;
   //TODO: fill
 }
+void FrankaComponent::error_recovery(){
+  panda->automaticErrorRecovery();
+}
 
 
 void FrankaComponent::low_level_velocity(){
@@ -148,7 +152,6 @@ void FrankaComponent::low_level_velocity(){
 
 
 void FrankaComponent::admittance(){
-
   try {
     panda->control([&](const franka::RobotState&, franka::Duration) -> franka::Torques {
         return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
@@ -156,8 +159,6 @@ void FrankaComponent::admittance(){
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
   }
-
-  //TODO: fill
 }
 
 std::vector<double> FrankaComponent::get_joint_angles(){

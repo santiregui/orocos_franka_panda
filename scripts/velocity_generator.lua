@@ -33,8 +33,8 @@ function updateHook()
 
 -- angle = math.sin(2*math.pi*frequency*time )*amplitud
 angle = math.sin(2*math.pi*frequency*time )*amplitud
--- mytab = {0,0,0,0,0,0,angle} --For velocities
-mytab = {0,0,0,0,0,0,0} --For velocities
+mytab = {0,0,0,0,0,0,angle} --For velocities
+-- mytab = {0,0,0,0,0,0,0} --For velocities
 -- mytab = {0,0,0,0,0,0,2*math.pi/180} --For velocities
 
 joint_setpoints:fromtab(mytab)

@@ -37,23 +37,18 @@ depl:loadComponent("panda", "FrankaComponent")
 panda=depl:getPeer("panda")
 panda:getProperty('ip_address'):set("172.16.0.2")
 depl:setActivity("panda", 0, 99, rtt.globals.ORO_SCHED_RT)
--- panda:setPeriod(0.005)
-
--- panda:start()
-
-
 
 --Connect the ports
 cp=rtt.Variable("ConnPolicy")
 depl:connect("panda.sensor_joint_angles","traj_gen.measured_angles",cp )
 depl:connect("panda.control_joint_velocities","traj_gen.desired_velocities",cp )
 
---Call configureHook() functions of both components
 panda:configure()
 traj_gen:configure()
 
 depl:setActivity("traj_gen", 0.01, 0, rtt.globals.ORO_SCHED_OTHER)
 traj_gen:start()
 
+panda:error_recovery()
 panda:low_level_velocity()
---Start running the loop of both components.
+-- panda:admittance()

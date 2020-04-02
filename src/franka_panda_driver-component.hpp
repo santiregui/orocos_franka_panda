@@ -31,6 +31,7 @@ class FrankaComponent : public RTT::TaskContext{
     void admittance();
     void low_level_velocity();
     void stop_control_loop();
+    void error_recovery();
     std::vector<double> get_joint_angles();
 
   private:
