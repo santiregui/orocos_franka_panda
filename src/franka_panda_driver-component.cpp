@@ -3,6 +3,7 @@
 #include <iostream>
 
 #define NR_JOINT 7
+#define LOG_SIZE 5
 
 void setDefaultBehavior(FrankaComponent::PandaPtr& panda) {
   panda->setCollisionBehavior(
@@ -17,6 +18,8 @@ void setDefaultBehavior(FrankaComponent::PandaPtr& panda) {
 FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreOperational)
   , p_ip_address("172.16.0.2")
   , control_loop_running(false)
+  , cutoff_frequency(100)
+  , rate_limiters(true)
   {
 
   /* Setting up Orocos component interface */
@@ -30,6 +33,8 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   // Properties
   this->addProperty("ip_address", p_ip_address).doc("ip_address of the robot's controller. Default: 172.16.0.2");
   this->addProperty("cartesian_impedance", cartesian_impedance).doc("Cartesian impedance (3 for forces and 3 for torques)");
+  this->addProperty("cutoff_frequency", cutoff_frequency).doc("cutoff_frequency [Hz] for built-in filter of frankalib to avoid packet looses due to communication issues. To turn it off set it to 1000 Hz");
+  this->addProperty("rate_limiters", rate_limiters).doc("libfranka built-in rate limiters. For velocity control it will limit the acceleration and jerk, while for torque control, it will limit the torque rate");
 
   //Operations
   this->addOperation("start_sending_setpoints",  &FrankaComponent::start_sending_setpoints, this, OwnThread).doc("Starts sending the setpoints of the joints to the robot");
@@ -58,7 +63,7 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
 
 
   try {
-    panda = std::make_unique<franka::Robot>(franka::Robot(p_ip_address));
+    panda = std::make_unique<franka::Robot>(franka::Robot(p_ip_address,franka::RealtimeConfig::kEnforce,LOG_SIZE)); //change kEnforce to kIgnore to stop enforcing realtime mode for a control loop thread.
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
   }
@@ -139,8 +144,6 @@ void FrankaComponent::low_level_velocity(){
             velocities = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
           }
           for(unsigned int i=0;i<NR_JOINT;++i) {
-            // m_joint_states.position[i]   = state.q[i];
-            // m_joint_states.velocity[i] = state.dq[i];
             temporary_actual_pos[i] = state.q[i];
           }
           for(unsigned int i=0;i<6;++i) {
@@ -162,8 +165,31 @@ void FrankaComponent::low_level_velocity(){
           //   return franka::MotionFinished(velocities);
           // }
           return velocities;
-        },franka::ControllerMode::kCartesianImpedance);
-  } catch (const franka::Exception& e) {
+        },franka::ControllerMode::kCartesianImpedance, rate_limiters, cutoff_frequency);
+  }
+  catch (const franka::ControlException& e) {
+    std::cout << e.what() << std::endl;
+    std::vector< franka::Record > log = e.log;
+    std::cout << "Last joint positions before the exception was captured" << std::endl;
+    for (unsigned int i = 0; i < log.size(); i++) {
+      log_q = log[i].state.q;
+      for (unsigned int n = 0; n < log_q.size(); n++) {
+        std::cout << log_q[n] << ' ';
+      }
+      std::cout << "  " << std::endl;
+    }
+    std::cout << "Last wrenches before the exception was captured" << std::endl;
+    for (unsigned int i = 0; i < log.size(); i++) {
+      log_wrench = log[i].state.K_F_ext_hat_K;
+      for (unsigned int n = 0; n < log_wrench.size(); n++) {
+        std::cout << log_wrench[n] << ' ';
+      }
+      std::cout << "  " << std::endl;
+    }
+
+    // panda->automaticErrorRecovery();
+  }
+   catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
   }
 }
@@ -195,5 +221,11 @@ std::vector<double> FrankaComponent::get_joint_angles(){
   }
   return temporary_actual_pos;
 }
+
+// void print_vec(std::vector<double>  &input){
+// 	for (unsigned int i = 0; i < input.size(); i++) {
+// 		std::cout << input[i] << ' ';
+// 	}
+// }
 
 ORO_CREATE_COMPONENT(FrankaComponent)

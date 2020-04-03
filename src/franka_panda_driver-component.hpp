@@ -77,16 +77,22 @@ class FrankaComponent : public RTT::TaskContext{
     franka::RobotState                        temporary_robot_state;
     std::string                               events;
 
+    std::array<double, 7>                     log_q;
+    std::array<double, 6>                     log_wrench;
 
     // Properties
-    std::string p_ip_address;
+    std::string                               p_ip_address;
     std::vector<double>                       cartesian_impedance;
+    double                                    cutoff_frequency;
+    bool                                      rate_limiters;
 
     // Port Interface
     RTT::InputPort<std::vector<double>>      control_joint_velocities;
     RTT::InputPort<std::string>              events_port;
     RTT::OutputPort<std::vector<double>>     sensor_joint_angles;
     RTT::OutputPort<std::vector<double>>     tool_external_wrench;
+
+    // void print_vec();
 
 
 };
