@@ -17,7 +17,7 @@ end
 
 depl:import("rtt_ros")
 depl:import("rtt_sensor_msgs")
-depl:import("franka_panda_driver")
+-- depl:import("franka_panda_driver")
 depl:import("rtt_motion_control_msgs")
 
 gs=rtt.provides()
@@ -38,6 +38,16 @@ depl:loadComponent("panda", "FrankaComponent")
 panda=depl:getPeer("panda")
 panda:getProperty('ip_address'):set("172.16.0.2")
 depl:setActivity("panda", 0, 99, rtt.globals.ORO_SCHED_RT)
+
+cartesian_impedance = rtt.Variable("array")
+cartesian_impedance:fromtab{3000, 3000, 500, 100, 100, 100}
+panda:getProperty('cartesian_impedance'):set(cartesian_impedance)
+panda:getProperty('impedance_mode'):set("cartesian")
+
+-- joint_impedance = rtt.Variable("array")
+-- joint_impedance:fromtab{3000, 500, 3000, 2500, 2500, 2000, 2000}
+-- panda:getProperty('joint_impedance'):set(joint_impedance)
+-- panda:getProperty('impedance_mode'):set("joint")
 
 --Connect the ports
 cp=rtt.Variable("ConnPolicy")

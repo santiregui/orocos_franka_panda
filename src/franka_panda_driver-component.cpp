@@ -20,6 +20,10 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   , control_loop_running(false)
   , cutoff_frequency(100)
   , rate_limiters(true)
+  , cartesian_impedance(6)
+  , joint_impedance(NR_JOINT)
+  , impedance_mode("joint")
+  , controller_mode(franka::ControllerMode::kJointImpedance)
   {
 
   /* Setting up Orocos component interface */
@@ -33,8 +37,10 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   // Properties
   this->addProperty("ip_address", p_ip_address).doc("ip_address of the robot's controller. Default: 172.16.0.2");
   this->addProperty("cartesian_impedance", cartesian_impedance).doc("Cartesian impedance (3 for forces and 3 for torques)");
+  this->addProperty("joint_impedance", joint_impedance).doc("Joint impedance: 7 values, one for each joint");
   this->addProperty("cutoff_frequency", cutoff_frequency).doc("cutoff_frequency [Hz] for built-in filter of frankalib to avoid packet looses due to communication issues. To turn it off set it to 1000 Hz");
   this->addProperty("rate_limiters", rate_limiters).doc("libfranka built-in rate limiters. For velocity control it will limit the acceleration and jerk, while for torque control, it will limit the torque rate");
+  this->addProperty("impedance_mode", impedance_mode).doc("Impedance Mode. Set to: 'joint' (default) or 'cartesian'");
 
   //Operations
   this->addOperation("start_sending_setpoints",  &FrankaComponent::start_sending_setpoints, this, OwnThread).doc("Starts sending the setpoints of the joints to the robot");
@@ -49,13 +55,10 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   temporary_actual_pos.resize(NR_JOINT,0.0);
   temporary_actual_wrench.resize(6,0.0);
   cartesian_impedance.resize(6,0.0);
-  // cartesian_impedance = {{3000, 3000, 1500, 100, 100, 100}}
-  cartesian_impedance[0] = 3000;
-  cartesian_impedance[1] = 3000;
-  cartesian_impedance[2] = 1500;
-  cartesian_impedance[3] = 100;
-  cartesian_impedance[4] = 100;
-  cartesian_impedance[5] = 100;
+  joint_impedance.resize(7,0.0);
+  cartesian_impedance = {3000, 3000, 1500, 100, 100, 100};
+  joint_impedance = {3000, 3000, 3000, 2500, 2500, 2000, 2000};
+
 
   sensor_joint_angles.setDataSample( temporary_actual_pos );
   tool_external_wrench.setDataSample( temporary_actual_wrench );
@@ -130,8 +133,19 @@ void FrankaComponent::low_level_velocity(){
   control_loop_running = true;
   try {
 
-    panda->setCartesianImpedance({{cartesian_impedance[0], cartesian_impedance[1], cartesian_impedance[2], cartesian_impedance[3], cartesian_impedance[4], cartesian_impedance[5]}});
+    if(impedance_mode == "cartesian") {
+      panda->setCartesianImpedance({{cartesian_impedance[0], cartesian_impedance[1], cartesian_impedance[2], cartesian_impedance[3], cartesian_impedance[4], cartesian_impedance[5]}});
+      controller_mode = franka::ControllerMode::kCartesianImpedance;
+      std::cout << "Set to Cartesian Impedance mode" << std::endl;
+    }
+    else{
+      panda->setJointImpedance({{joint_impedance[0], joint_impedance[1], joint_impedance[2], joint_impedance[3], joint_impedance[4], joint_impedance[5], joint_impedance[6]}});
+      controller_mode = franka::ControllerMode::kJointImpedance;
+      std::cout << "Set to Joint Impedance mode" << std::endl;
+    }
+
     // panda->setCartesianImpedance({{3000, 3000, 1500, 100, 100, 100}});
+    // panda->setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
     franka::JointVelocities velocities = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     panda->control(
         [&](const franka::RobotState& state, franka::Duration period) -> franka::JointVelocities {
@@ -165,7 +179,7 @@ void FrankaComponent::low_level_velocity(){
           //   return franka::MotionFinished(velocities);
           // }
           return velocities;
-        },franka::ControllerMode::kCartesianImpedance, rate_limiters, cutoff_frequency);
+        },controller_mode, rate_limiters, cutoff_frequency);
   }
   catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;
