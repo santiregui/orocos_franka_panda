@@ -10,8 +10,8 @@ void setDefaultBehavior(FrankaComponent::PandaPtr& panda) {
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
-  panda->setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
-  panda->setCartesianImpedance({{3000, 3000, 3000, 300, 300, 300}});
+  // panda->setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
+  panda->setCartesianImpedance({{3000, 3000, 500, 300, 300, 300}});
 }
 
 FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreOperational)
@@ -116,7 +116,8 @@ void FrankaComponent::low_level_velocity(){
   control_loop_running = true;
   try {
 
-  franka::JointVelocities velocities = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    panda->setCartesianImpedance({{3000, 3000, 1500, 100, 100, 100}});
+    franka::JointVelocities velocities = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     panda->control(
         [&](const franka::RobotState& state, franka::Duration period) -> franka::JointVelocities {
           // std::fill(temporary_actual_pos.begin(), temporary_actual_pos.end(), 0.0); //Assigns zero values to the vector, just in case to prevent the posibility of observing old values. Can be deleted to improve a bit the speed.
@@ -151,7 +152,7 @@ void FrankaComponent::low_level_velocity(){
           //   return franka::MotionFinished(velocities);
           // }
           return velocities;
-        });
+        },franka::ControllerMode::kCartesianImpedance);
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
   }

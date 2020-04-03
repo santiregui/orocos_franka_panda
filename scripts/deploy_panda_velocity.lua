@@ -33,6 +33,7 @@ depl:loadComponent("traj_gen", "OCL::LuaComponent")
 traj_gen = depl:getPeer("traj_gen")
 traj_gen:exec_file(dir .. "velocity_generator.lua")
 
+ros:import("orocos_franka_panda")
 depl:loadComponent("panda", "FrankaComponent")
 panda=depl:getPeer("panda")
 panda:getProperty('ip_address'):set("172.16.0.2")
@@ -40,8 +41,8 @@ depl:setActivity("panda", 0, 99, rtt.globals.ORO_SCHED_RT)
 
 --Connect the ports
 cp=rtt.Variable("ConnPolicy")
-depl:connect("panda.tool_external_wrench","traj_gen.measured_angles",cp )
--- depl:connect("panda.sensor_joint_angles","traj_gen.measured_angles",cp )
+-- depl:connect("panda.tool_external_wrench","traj_gen.measured_angles",cp )
+depl:connect("panda.sensor_joint_angles","traj_gen.measured_angles",cp )
 depl:connect("panda.control_joint_velocities","traj_gen.desired_velocities",cp )
 
 panda:configure()
@@ -52,5 +53,5 @@ depl:setActivity("traj_gen", 0.2, 0, rtt.globals.ORO_SCHED_OTHER)
 traj_gen:start()
 
 panda:error_recovery()
--- panda:low_level_velocity()
-panda:admittance()
+panda:low_level_velocity()
+-- panda:admittance()
