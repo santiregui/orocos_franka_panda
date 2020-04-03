@@ -80,6 +80,7 @@ class FrankaComponent : public RTT::TaskContext{
 
     // Properties
     std::string p_ip_address;
+    std::vector<double>                       cartesian_impedance;
 
     // Port Interface
     RTT::InputPort<std::vector<double>>      control_joint_velocities;

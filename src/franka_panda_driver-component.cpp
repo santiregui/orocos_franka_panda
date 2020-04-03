@@ -29,6 +29,7 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   this->addPort("events_port",          events_port).doc("eTaSL Event Port (temporary solution)");
   // Properties
   this->addProperty("ip_address", p_ip_address).doc("ip_address of the robot's controller. Default: 172.16.0.2");
+  this->addProperty("cartesian_impedance", cartesian_impedance).doc("Cartesian impedance (3 for forces and 3 for torques)");
 
   //Operations
   this->addOperation("start_sending_setpoints",  &FrankaComponent::start_sending_setpoints, this, OwnThread).doc("Starts sending the setpoints of the joints to the robot");
@@ -42,6 +43,14 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   temporary_desired_vel.resize(NR_JOINT,0.0);
   temporary_actual_pos.resize(NR_JOINT,0.0);
   temporary_actual_wrench.resize(6,0.0);
+  cartesian_impedance.resize(6,0.0);
+  // cartesian_impedance = {{3000, 3000, 1500, 100, 100, 100}}
+  cartesian_impedance[0] = 3000;
+  cartesian_impedance[1] = 3000;
+  cartesian_impedance[2] = 1500;
+  cartesian_impedance[3] = 100;
+  cartesian_impedance[4] = 100;
+  cartesian_impedance[5] = 100;
 
   sensor_joint_angles.setDataSample( temporary_actual_pos );
   tool_external_wrench.setDataSample( temporary_actual_wrench );
@@ -116,7 +125,8 @@ void FrankaComponent::low_level_velocity(){
   control_loop_running = true;
   try {
 
-    panda->setCartesianImpedance({{3000, 3000, 1500, 100, 100, 100}});
+    panda->setCartesianImpedance({{cartesian_impedance[0], cartesian_impedance[1], cartesian_impedance[2], cartesian_impedance[3], cartesian_impedance[4], cartesian_impedance[5]}});
+    // panda->setCartesianImpedance({{3000, 3000, 1500, 100, 100, 100}});
     franka::JointVelocities velocities = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     panda->control(
         [&](const franka::RobotState& state, franka::Duration period) -> franka::JointVelocities {
