@@ -39,15 +39,19 @@ panda=depl:getPeer("panda")
 panda:getProperty('ip_address'):set("172.16.0.2")
 depl:setActivity("panda", 0, 99, rtt.globals.ORO_SCHED_RT)
 
-cartesian_impedance = rtt.Variable("array")
-cartesian_impedance:fromtab{3000, 3000, 500, 100, 100, 100}
-panda:getProperty('cartesian_impedance'):set(cartesian_impedance)
-panda:getProperty('impedance_mode'):set("cartesian")
+-- =======================Uncomment for Joint Impedance====================================
+      joint_impedance = rtt.Variable("array")
+      joint_impedance:fromtab{3000, 1000, 3000, 2500, 2500, 2000, 2000}
+      panda:getProperty('joint_impedance'):set(joint_impedance)
+      panda:getProperty('impedance_mode'):set("joint")
 
--- joint_impedance = rtt.Variable("array")
--- joint_impedance:fromtab{3000, 500, 3000, 2500, 2500, 2000, 2000}
--- panda:getProperty('joint_impedance'):set(joint_impedance)
--- panda:getProperty('impedance_mode'):set("joint")
+
+--=======================Uncomment for Cartesian Impedance====================================
+      -- cartesian_impedance = rtt.Variable("array")
+      -- cartesian_impedance:fromtab{3000, 3000, 500, 100, 100, 100}
+      -- panda:getProperty('cartesian_impedance'):set(cartesian_impedance)
+      -- panda:getProperty('impedance_mode'):set("cartesian")
+
 
 --Connect the ports
 cp=rtt.Variable("ConnPolicy")
@@ -63,5 +67,9 @@ depl:setActivity("traj_gen", 0.2, 0, rtt.globals.ORO_SCHED_OTHER)
 traj_gen:start()
 
 panda:error_recovery()
-panda:low_level_velocity()
+-- panda:gripper_change_apperture(0.05,0.1)
+-- panda:gripper_grasp(0.015,0.1,60)
+
+
+-- panda:low_level_velocity()
 -- panda:admittance()

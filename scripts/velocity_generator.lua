@@ -42,8 +42,8 @@ desired_velocities:write(joint_setpoints)
 time = time + tc:getPeriod()
 
     -- Uncomment for printing the measured angles in the terminal:
-    local fs,val= measured_angles:read()
-    print(val)
+    -- local fs,val= measured_angles:read()
+    -- print(val)
 
 end
 

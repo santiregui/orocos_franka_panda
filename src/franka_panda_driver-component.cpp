@@ -4,6 +4,8 @@
 
 #define NR_JOINT 7
 #define LOG_SIZE 5
+//Max apperture of the gripper, determined with homing franka::Gripper::homing
+#define MAX_APPERTURE 0.079
 
 void setDefaultBehavior(FrankaComponent::PandaPtr& panda) {
   panda->setCollisionBehavior(
@@ -49,6 +51,9 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   this->addOperation("low_level_velocity",  &FrankaComponent::low_level_velocity, this, OwnThread).doc("Start sending velocity setpoints at 1kHz");
   this->addOperation("stop_control_loop",  &FrankaComponent::stop_control_loop, this, OwnThread).doc("Stop the current control loop (at 1kHz)");
   this->addOperation("error_recovery",  &FrankaComponent::error_recovery, this, OwnThread).doc("Automatic error recovery (e.g. after the robot hits joint limits or collides)");
+  this->addOperation("gripper_grasp",  &FrankaComponent::gripper_grasp, this, OwnThread).doc("Grasp object with the franka gripper/hand. Arguments: velocity [m/s] and force [N]");
+  this->addOperation("gripper_grasp_with_check",  &FrankaComponent::gripper_grasp_with_check, this, OwnThread).doc("Grasp object with the franka gripper/hand. Arguments: grasping_width[m], velocity [m/s] and force [N],epsilon_inner [m], epsilon_outer [m] ");
+  this->addOperation("gripper_change_apperture",  &FrankaComponent::gripper_change_apperture, this, OwnThread).doc("Change gripper's apperture (without applying force). Arguments: grasping_width[m], velocity [m/s]");
 
   //Memory allocation for the size of the vectors done beforehand (real time)
   temporary_desired_vel.resize(NR_JOINT,0.0);
@@ -67,6 +72,7 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
 
   try {
     panda = std::make_unique<franka::Robot>(franka::Robot(p_ip_address,franka::RealtimeConfig::kEnforce,LOG_SIZE)); //change kEnforce to kIgnore to stop enforcing realtime mode for a control loop thread.
+    gripper = std::make_unique<franka::Gripper>(franka::Gripper(p_ip_address));
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
   }
@@ -234,6 +240,64 @@ std::vector<double> FrankaComponent::get_joint_angles(){
     temporary_actual_pos[i] = temporary_robot_state.q[i];
   }
   return temporary_actual_pos;
+}
+
+bool FrankaComponent::gripper_change_apperture(double grasping_width, double vel){
+  try {
+    // gripper->stop();
+    // gripper->homing();
+    gripper->move(grasping_width,vel);
+
+  } catch (franka::Exception const& e) {
+    std::cout << e.what() << std::endl;
+    return false;
+  }
+  return true;
+}
+bool FrankaComponent::gripper_grasp(double grasping_width, double vel, double force){
+  try {
+
+    // double grasping_width = std::stod(argv[3]);
+
+      // Do a homing in order to estimate the maximum grasping width with the current fingers.
+      // gripper->homing();
+    gripper->stop();
+    // Check for the maximum grasping width.
+    franka::GripperState gripper_state = gripper->readOnce();
+    if (MAX_APPERTURE < grasping_width) {
+      std::cout << "Object is too large for the current fingers on the gripper." << std::endl;
+      return false;
+    }
+    if (!gripper->grasp(grasping_width, vel, force,0.005, 0.005)) {
+      std::cout << "Failed to grasp object." << std::endl;
+      return false;
+    }
+  } catch (franka::Exception const& e) {
+    std::cout << e.what() << std::endl;
+    return false;
+  }
+  return true;
+}
+bool FrankaComponent::gripper_grasp_with_check(double grasping_width, double vel, double force, double epsilon_inner, double epsilon_outer){
+  try {
+
+    gripper->stop();
+    // Check for the maximum grasping width.
+    franka::GripperState gripper_state = gripper->readOnce();
+
+    if (MAX_APPERTURE < grasping_width) {
+      std::cout << "Object is too large for the current fingers on the gripper." << std::endl;
+      return false;
+    }
+    if (!gripper->grasp(grasping_width, vel, force, epsilon_inner,epsilon_outer)) {
+      std::cout << "Failed to grasp object." << std::endl;
+      return false;
+    }
+  } catch (franka::Exception const& e) {
+    std::cout << e.what() << std::endl;
+    return false;
+  }
+  return true;
 }
 
 // void print_vec(std::vector<double>  &input){

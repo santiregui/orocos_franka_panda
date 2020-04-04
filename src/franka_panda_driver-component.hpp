@@ -13,6 +13,7 @@
 
 #include <franka/exception.h>
 #include <franka/robot.h>
+#include <franka/gripper.h>
 #include <memory>
 
 using namespace std;
@@ -21,6 +22,8 @@ using namespace RTT;
 class FrankaComponent : public RTT::TaskContext{
   public:
     typedef std::unique_ptr<franka::Robot> PandaPtr;
+    typedef std::unique_ptr<franka::Gripper> GripperPtr;
+
     FrankaComponent(string const& name);
     bool configureHook();
     bool startHook();
@@ -33,9 +36,13 @@ class FrankaComponent : public RTT::TaskContext{
     void stop_control_loop();
     void error_recovery();
     std::vector<double> get_joint_angles();
+    bool gripper_change_apperture(double grasping_width, double vel);
+    bool gripper_grasp(double grasping_width,double vel, double force);
+    bool gripper_grasp_with_check(double grasping_width, double vel, double force, double epsilon_inner, double epsilon_outer);
 
   private:
     PandaPtr panda;
+    GripperPtr gripper;
     bool control_loop_running;
 
     // Internal, mem alloc
