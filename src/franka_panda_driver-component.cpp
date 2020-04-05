@@ -54,6 +54,7 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   this->addOperation("gripper_grasp",  &FrankaComponent::gripper_grasp, this, OwnThread).doc("Grasp object with the franka gripper/hand. Arguments: velocity [m/s] and force [N]");
   this->addOperation("gripper_grasp_with_check",  &FrankaComponent::gripper_grasp_with_check, this, OwnThread).doc("Grasp object with the franka gripper/hand. Arguments: grasping_width[m], velocity [m/s] and force [N],epsilon_inner [m], epsilon_outer [m] ");
   this->addOperation("gripper_change_apperture",  &FrankaComponent::gripper_change_apperture, this, OwnThread).doc("Change gripper's apperture (without applying force). Arguments: grasping_width[m], velocity [m/s]");
+  this->addOperation("gripper_homing",  &FrankaComponent::gripper_homing, this, OwnThread).doc("Gripper homing (calibration). Warning: the gripper move the whole range");
 
   //Memory allocation for the size of the vectors done beforehand (real time)
   temporary_desired_vel.resize(NR_JOINT,0.0);
@@ -253,6 +254,16 @@ bool FrankaComponent::gripper_change_apperture(double grasping_width, double vel
     return false;
   }
   return true;
+}
+double FrankaComponent::gripper_homing(){
+  try {
+    gripper->homing();
+    franka::GripperState gripper_state = gripper->readOnce();
+    return gripper_state.max_width;
+  } catch (franka::Exception const& e) {
+    std::cout << e.what() << std::endl;
+    return -1;
+  }
 }
 bool FrankaComponent::gripper_grasp(double grasping_width, double vel, double force){
   try {

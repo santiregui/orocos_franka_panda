@@ -39,6 +39,7 @@ class FrankaComponent : public RTT::TaskContext{
     bool gripper_change_apperture(double grasping_width, double vel);
     bool gripper_grasp(double grasping_width,double vel, double force);
     bool gripper_grasp_with_check(double grasping_width, double vel, double force, double epsilon_inner, double epsilon_outer);
+    double gripper_homing();
 
   private:
     PandaPtr panda;
