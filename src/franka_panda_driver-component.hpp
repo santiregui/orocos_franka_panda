@@ -91,6 +91,7 @@ class FrankaComponent : public RTT::TaskContext{
 
     // Properties
     std::string                               p_ip_address;
+    std::string                               event_stop_loop;
     std::vector<double>                       cartesian_impedance;
     std::vector<double>                       joint_impedance;
     double                                    cutoff_frequency;

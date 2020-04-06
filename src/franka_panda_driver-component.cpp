@@ -14,11 +14,12 @@ void setDefaultBehavior(FrankaComponent::PandaPtr& panda) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
   // panda->setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
-  panda->setCartesianImpedance({{3000, 3000, 500, 300, 300, 300}});
+  // panda->setCartesianImpedance({{3000, 3000, 500, 300, 300, 300}});
 }
 
 FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreOperational)
   , p_ip_address("172.16.0.2")
+  , event_stop_loop("stop_loop")
   , control_loop_running(false)
   , cutoff_frequency(100)
   , rate_limiters(true)
@@ -43,6 +44,7 @@ FrankaComponent::FrankaComponent(std::string const& name): TaskContext(name,PreO
   this->addProperty("cutoff_frequency", cutoff_frequency).doc("cutoff_frequency [Hz] for built-in filter of frankalib to avoid packet looses due to communication issues. To turn it off set it to 1000 Hz");
   this->addProperty("rate_limiters", rate_limiters).doc("libfranka built-in rate limiters. For velocity control it will limit the acceleration and jerk, while for torque control, it will limit the torque rate");
   this->addProperty("impedance_mode", impedance_mode).doc("Impedance Mode. Set to: 'joint' (default) or 'cartesian'");
+  this->addProperty("event_stop_loop", event_stop_loop).doc("When receiving this string through the 'events_port' port, the control loop will stop.");
 
   //Operations
   this->addOperation("start_sending_setpoints",  &FrankaComponent::start_sending_setpoints, this, OwnThread).doc("Starts sending the setpoints of the joints to the robot");
@@ -168,18 +170,16 @@ void FrankaComponent::low_level_velocity(){
             temporary_actual_pos[i] = state.q[i];
           }
           for(unsigned int i=0;i<6;++i) {
-            temporary_actual_wrench[i] = state.K_F_ext_hat_K[i];
+            temporary_actual_wrench[i] = -state.K_F_ext_hat_K[i];
           }
 
           sensor_joint_angles.write(temporary_actual_pos);
           tool_external_wrench.write(temporary_actual_wrench);
 
 
-          if (events_port.read(events) == NewData) {
+          if (events_port.read(events) == NewData && events == event_stop_loop) {
+            std::cout << "Event '" <<event_stop_loop <<"' received through events_port. Control loop stopped" << std::endl;
             return franka::MotionFinished(velocities);
-            std::cout << "eTasL Event received:" << std::endl;
-            std::cout << events << std::endl;
-            std::cout << "Finished motion" << std::endl;
           }
           // if (!control_loop_running) {
           //   std::cout << "Finished motion" << std::endl;
