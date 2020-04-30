@@ -2,14 +2,13 @@
   <name>orocos_franka_panda</name>
   <version>1.0.0</version>
   <description>An Orocos component wrapper of libfranka for Panda</description>
-  <maintainer email="enea.scioni@kuleuven.be">Enea Scioni</maintainer>
+  <maintainer email="santiago.iregui@kuleuven.be">Santiago Iregui</maintainer>
 
   <license>Unknown</license>
 
-  <url type="github.com/haianos/franka_panda_driver"></url>
   <!-- <url type="bugtracker"></url> -->
 
-  <author>Enea Scioni</author>
+  <author>Santiago Iregui</author>
 
   <build_depend>orogen</build_depend>
   <buildtool_depend>catkin</buildtool_depend>
