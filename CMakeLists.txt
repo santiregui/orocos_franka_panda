@@ -8,12 +8,18 @@ cmake_minimum_required(VERSION 2.6.3)
 # This creates a standard cmake project. You may extend this file with
 # any cmake macro you see fit.
 #
-project(franka_panda_driver)
+project(orocos_franka_panda)
+# add_definitions(-std=c++11)
+
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -Wall")#Generates additional warning messages when compiling
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# catkin_package(
+#     CATKIN_DEPENDS etasl_rtt
+# )
 # Use 'source orocos_toolchain/env.sh' if the command below fails:
 find_package(OROCOS-RTT QUIET)
 if (NOT OROCOS-RTT_FOUND)
@@ -24,7 +30,13 @@ find_package(catkin REQUIRED
   rtt_motion_control_msgs
   rtt_sensor_msgs
   rtt_trajectory_msgs
+  sensor_msgs
+  motion_control_msgs
 )
+
+# find_package(catkin QUIET OPTIONAL_COMPONENTS rtt_ros roscpp)
+
+
 
 
 # Defines the orocos_* cmake macros. See that file for additional
@@ -36,7 +48,12 @@ include( ${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake )
 # link_directories(/home/haianos/experimental/libfranka/install/lib)
 
 # TODO: FiX me
-link_directories(/home/haianos/frankaws/devel/lib)
+# link_directories(/home/haianos/frankaws/devel/lib)
+# link_directories(/home/santiregui/etasl-install/ws/etasl-ex/devel/lib)
+
+include_directories(
+   libfranka/include
+)
 
 # Rest of the configuration is in src/
 add_subdirectory(src)
