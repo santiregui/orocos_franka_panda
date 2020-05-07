@@ -6,7 +6,7 @@
 
 - libfranka
 - Orocos toolchain 2.9 installed
-- ROS (only catkin is used for handling the packages. It is possible to modify the CMakeLists for getting rid of this dependency)
+- ROS Melodic (only catkin is used for handling the packages. It is possible to modify the CMakeLists for getting rid of this dependency)
 - Real Time Kernel (installation instructions found [here](https://frankaemika.github.io/docs/installation_linux.html)). If you don't use the Real Time Kernel you will get communication errors due to the very strict requirements of the real time controller of the Franka.
 
 
