@@ -170,7 +170,7 @@ void FrankaComponent::low_level_velocity(){
             temporary_actual_pos[i] = state.q[i];
           }
           for(unsigned int i=0;i<6;++i) {
-            temporary_actual_wrench[i] = -state.K_F_ext_hat_K[i];
+            temporary_actual_wrench[i] = -state.K_F_ext_hat_K[i]; //The minus is to be able to use it in admittance (action-reaction)
           }
 
           sensor_joint_angles.write(temporary_actual_pos);

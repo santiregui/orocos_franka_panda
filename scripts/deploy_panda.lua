@@ -17,13 +17,13 @@ depl=tc:getPeer("Deployer")
 depl:import("rtt_ros")
 depl:import("rtt_rospack")
 depl:import("rtt_sensor_msgs")
-depl:import("franka_panda_driver")
 depl:import("rtt_motion_control_msgs")
 --- Loading ROS-based Libraries
 gs = rtt.provides()
 ros = gs:provides("ros")
 depl:import('rtt_rosnode')
 --
+depl:import("orocos_franka_panda")
 depl:loadComponent("panda", "FrankaComponent")
 panda=depl:getPeer("panda")
 
