@@ -22,7 +22,7 @@ It is also possible (not yet tested) to install the library from source (git sub
 
 This package contains the Git submodule libfranka. Clone it using --recursive flag:
 ```shell
-git clone --recursive git@gitlab.kuleuven.be:rob-hardware/orocos_franka_panda.git
+git clone --recursive git@github.com:santiregui/orocos_franka_panda.git
 ```
 
 Compile using `catkin_make` from the root workspace.
