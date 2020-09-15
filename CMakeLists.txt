@@ -36,6 +36,10 @@ find_package(catkin REQUIRED
 
 # find_package(catkin QUIET OPTIONAL_COMPONENTS rtt_ros roscpp)
 
+# set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libfranka/build:${CMAKE_PREFIX_PATH}")#Generates additional warning messages when compiling
+
+#Comment this when using the binary version of libfranka
+set(FRANKA_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libfranka/build/libfranka.so")
 
 
 
@@ -49,13 +53,15 @@ include( ${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake )
 
 # TODO: FiX me
 # link_directories(/home/haianos/frankaws/devel/lib)
-# link_directories(/home/santiregui/etasl-install/ws/etasl-ex/devel/lib)
+# link_directories("${CMAKE_CURRENT_SOURCE_DIR}/libfranka/build")
+
 
 include_directories(
    libfranka/include
 )
 
 # Rest of the configuration is in src/
+# add_subdirectory(libfranka)
 add_subdirectory(src)
 #
 # Building a typekit using typegen (recommended):

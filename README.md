@@ -14,16 +14,32 @@
 
 (Tested on Ubuntu 18.04 LTS, Orocos 2.9, Ros Melodic)
 
+This package contains the Git submodule libfranka. Clone it using --recursive flag:
+```shell
+git clone --recursive https://github.com/santiregui/orocos_franka_panda.git
+```
+
+ Run the following to build libfranka:
+ ```bash
+cd libfranka
+git checkout 0.7.1
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
+ ```
+
+
+ <!-- ### Frankalib with apt
+
+Right now it is not possible to do this since you get the latest API version, which is not compatible with this driver (we need 0.7.1).
+
 Install the libfranka libraries:
 ```shell
 sudo apt install ros-melodic-libfranka ros-melodic-franka-ros
 ```
-It is also possible (not yet tested) to install the library from source (git submodule libfranka). Right now the driver only uses the header files of this submodule.
+  -->
 
-This package contains the Git submodule libfranka. Clone it using --recursive flag:
-```shell
-git clone --recursive git@github.com:santiregui/orocos_franka_panda.git
-```
 
 Compile using `catkin_make` from the root workspace.
 

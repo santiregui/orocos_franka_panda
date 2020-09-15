@@ -14,10 +14,11 @@ orocos_component(FrankaComponent franka_panda_driver-component.hpp franka_panda_
 
 # target_link_libraries(FrankaComponent /home/santiregui/etasl-install/ws/etasl-ex/devel/lib/lib/libfranka.so.0.7.1)
 
-# find_library(FRANKA_LIB franka HINTS /lib/)
-find_library(FRANKA_LIB franka)
-target_link_libraries(FrankaComponent ${FRANKA_LIB})
+#Uncomment the following when using the binary libfranka:
+# find_library(FRANKA_LIB franka)
 
+# find_library(FRANKA_LIB franka HINTS /libfranka/build/)
+target_link_libraries(FrankaComponent ${FRANKA_LIB})
 
 
 
