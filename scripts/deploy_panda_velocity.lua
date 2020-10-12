@@ -62,8 +62,8 @@ depl:connect("panda.control_joint_velocities","traj_gen.desired_velocities",cp )
 panda:configure()
 traj_gen:configure()
 
--- depl:setActivity("traj_gen", 0.01, 0, rtt.globals.ORO_SCHED_OTHER)
-depl:setActivity("traj_gen", 0.2, 0, rtt.globals.ORO_SCHED_OTHER)
+depl:setActivity("traj_gen", 0.01, 0, rtt.globals.ORO_SCHED_OTHER)
+-- depl:setActivity("traj_gen", 0.2, 0, rtt.globals.ORO_SCHED_OTHER)
 traj_gen:start()
 
 panda:error_recovery()
@@ -71,5 +71,5 @@ panda:error_recovery()
 -- panda:gripper_grasp(0.015,0.1,60)
 
 
--- panda:low_level_velocity()
+panda:low_level_velocity()
 -- panda:admittance()

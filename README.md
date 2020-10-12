@@ -4,12 +4,13 @@
 
 ## Requirements
 
-- libfranka
+- libfranka 0.8.0
+- Franka Firmware V 4.0
 - Orocos toolchain 2.9 installed
 - ROS Melodic (only catkin is used for handling the packages. It is possible to modify the CMakeLists for getting rid of this dependency)
 - Real Time Kernel (installation instructions found [here](https://frankaemika.github.io/docs/installation_linux.html)). If you don't use the Real Time Kernel you will get communication errors due to the very strict requirements of the real time controller of the Franka.
 
-
+**Note:** The driver might as well work for other versions of libfranka and the corresponding firmware, but hasn't been tested. If you want to use another version you can try pulling the last commits of the libfranka git submodule (maybe you need to checkout the common submodule inside libfranka to a previous version as well), and then recompile libfranka. Afterwards, recompile the driver also.
 ## Install
 
 (Tested on Ubuntu 18.04 LTS, Orocos 2.9, Ros Melodic)
@@ -19,14 +20,14 @@ This package contains the Git submodule libfranka. Clone it using --recursive fl
 git clone --recursive https://github.com/santiregui/orocos_franka_panda.git
 ```
 
- Run the following to build libfranka:
+ Run the following to compile the libfranka:
  ```bash
 cd libfranka
-git checkout 0.7.1
+git checkout <version_tag> #use only if the last version of API is higher than 0.8
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
-cmake --build .
+make
  ```
 
 
@@ -41,7 +42,7 @@ sudo apt install ros-melodic-libfranka ros-melodic-franka-ros
   -->
 
 
-Compile using `catkin_make` from the root workspace.
+Afterwards, compile using `catkin_make` from the root workspace.
 
 ## How to use
 
