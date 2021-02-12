@@ -32,6 +32,7 @@ class FrankaComponent : public RTT::TaskContext{
     void cleanupHook();
     void start_sending_setpoints();
     void admittance();
+    void stream_sensor_data();
     void low_level_velocity();
     void stop_control_loop();
     void error_recovery();
@@ -44,6 +45,7 @@ class FrankaComponent : public RTT::TaskContext{
   private:
     PandaPtr panda;
     GripperPtr gripper;
+    // franka::Gripper gripper;
     bool control_loop_running;
 
     // Internal, mem alloc
@@ -96,7 +98,18 @@ class FrankaComponent : public RTT::TaskContext{
     std::vector<double>                       joint_impedance;
     double                                    cutoff_frequency;
     bool                                      rate_limiters;
+    bool                                      gripper_connected;
+    bool                                      gripper_constructed;
     std::string                               impedance_mode;
+
+    std::vector<double>                       lower_torque_thresholds_acceleration;
+    std::vector<double>                       upper_torque_thresholds_acceleration;
+    std::vector<double>                       lower_torque_thresholds_nominal;
+    std::vector<double>                       upper_torque_thresholds_nominal;
+    std::vector<double>                       lower_force_thresholds_acceleration;
+    std::vector<double>                       upper_force_thresholds_acceleration;
+    std::vector<double>                       lower_force_thresholds_nominal;
+    std::vector<double>                       upper_force_thresholds_nominal;
 
     // Port Interface
     RTT::InputPort<std::vector<double>>      control_joint_velocities;
