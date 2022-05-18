@@ -189,7 +189,8 @@ bool FrankaComponent::configureHook(){
 bool FrankaComponent::startHook(){
 
   log( Info )<< "Franka_panda_driver started !" << endlog();
-  low_level_velocity();
+  // low_level_velocity();
+  this->getActivity()->trigger();
   // panda->control(
   // [&  ](const franka::RobotState& state, franka::Duration period) -> franka::JointVelocities {
   //
@@ -212,7 +213,8 @@ bool FrankaComponent::startHook(){
 }
 
 void FrankaComponent::updateHook(){
-//   std::cout << "Franka_panda_driver executes updateHook !" <<std::endl;
+  std::cout << "Franka_panda_driver executes updateHook !" <<std::endl;
+  low_level_velocity();
 // TODO: Stop the activity whenever this is called (franka takes care of the 1kHz loop)
 }
 
